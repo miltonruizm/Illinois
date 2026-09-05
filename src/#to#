@@ -1,0 +1,17 @@
+
+  if (stats.which_routine == Palenzuela1D) {
+    
+    press = press_energy;
+    temp  = temp_energy;
+    eps   = eps_energy;
+    ent   = ent_energy;
+    
+  } else {
+    
+    press = press_entropy;
+    temp  = temp_entropy;
+    eps   = eps_entropy;
+    ent   = ent_entropy;
+
+  }
+

@@ -1,0 +1,5 @@
+	      //--
+	      if (eos.is_Tabulated && igm_temperature[index] > 5.0e10) {
+		printf("HOT CELL: it=%d " "i=%d j=%d k=%d " "rho=%e ""T=%e " "eps=%e " "S=%e " "tau=%e " "Ye=%e " "mask=%d\n",cctk_iteration,
+		       i,j,k,rho_b[index],igm_temperature[index],igm_eps[index],igm_entropy[index],tau[index],igm_Ye[index],igm_c2p_mask[index]);}
+	      //--

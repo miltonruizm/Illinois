@@ -1,0 +1,118 @@
+//--------------------------------------------------
+// Diagnostic dual recovery
+//--------------------------------------------------
+
+double rho = prim[RHO];
+double Ye  = prim[YE];
+double W   = prim[WLORENTZ];
+
+//--------------------------------------------------
+// Energy branch
+//--------------------------------------------------
+
+double eps_energy =
+    W - 1.0
+  + (1.0-W*W)*x/W
+  + W*( param[par_q]
+      - param[par_s]
+      + param[par_t]*param[par_t]/(2.0*x*x)
+      + param[par_s]/(2.0*W*W) );
+
+double press_energy = 0.0;
+double ent_energy   = 0.0;
+double temp_energy  = 0.0;
+//double temp_energy  = temp_guess;
+
+recover_from_energy(
+    eos,
+    rho,
+    Ye,
+    eps_energy,
+    &press_energy,
+    &ent_energy,
+    &temp_energy
+);
+
+//--------------------------------------------------
+// Entropy branch
+//--------------------------------------------------
+
+double ent_entropy = con[WS]/W;
+
+double press_entropy = 0.0;
+double eps_entropy   = 0.0;
+//double temp_entropy  = temp_guess;
+double temp_entropy  = 0.0;
+
+recover_from_entropy(
+    eos,
+    rho,
+    Ye,
+    ent_entropy,
+    &press_entropy,
+    &eps_entropy,
+    &temp_entropy
+);
+
+//--------------------------------------------------
+// Compare the two thermodynamic states
+//--------------------------------------------------
+
+double dT   = temp_energy  - temp_entropy;
+double deps = eps_energy   - eps_entropy;
+double dS   = ent_energy   - ent_entropy;
+double dP   = press_energy - press_entropy;
+
+double rel_eps =
+    fabs(deps)/(fabs(eps_energy)+1e-15);
+
+double rel_T =
+    fabs(dT)/(fabs(temp_energy)+1e-15);
+
+double rel_P =
+    fabs(dP)/(fabs(press_energy)+1e-15);
+
+double rel_S =
+    fabs(dS)/(fabs(ent_energy)+1e-15);
+
+//if (rel_eps > 1e-6 || rel_S > 1e-6) {
+if (rho > 1e-8 &&
+    (rel_eps > 1e-6 || rel_S > 1e-6)) {
+    fprintf(stderr,
+            "THERMO_DIFF: "
+            "rho=%e "
+            "W=%e "
+            "dT=%e "
+            "deps=%e "
+            "dS=%e "
+            "dP=%e\n",
+            rho,
+            W,
+            dT,
+            deps,
+            dS,
+            dP);
+
+    fprintf(stderr,
+            "REL_DIFF: "
+            "eps=%e "
+            "T=%e "
+            "P=%e "
+            "S=%e\n",
+            rel_eps,
+            rel_T,
+            rel_P,
+            rel_S);
+ }
+
+
+fprintf(stderr,
+        "DUAL_STATE: "
+        "rho=%e W=%e Ye=%e\n"
+        "  ENERGY : eps=%e T=%e P=%e S=%e\n"
+        "  ENTROPY: eps=%e T=%e P=%e S=%e\n",
+        rho, W, Ye,
+        eps_energy, temp_energy, press_energy, ent_energy,
+        eps_entropy, temp_entropy, press_entropy, ent_entropy);
+ 
+}
